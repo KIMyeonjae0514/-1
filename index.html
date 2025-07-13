@@ -1,17 +1,383 @@
-<!doctype html>
-<html>
-  <head>
-    <meta charset="utf-8" />
-    <link href="style.css" rel="stylesheet" type="text/css" />
-    <title>내소개</title>
-  </head>
-  <body>
-    <button onclick="magic(event)"><lee>hello world !!!</lee></button>
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>부모님을 위한 서프라이즈 방탈출 게임</title>
+    <style>
+        /* CSS 코드 */
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+        }
 
-    <h1>나의 소개</h1>
-    <h2>이름 : 김연재</h2>
-    <h3>국밥을 좋아합니다</h3>
-    <p>그럼 이만</p>
-    <script src="script.js"></script> 
-  </body>
+        #game-container {
+            position: relative;
+            width: 1024px;
+            height: 768px;
+            border: 2px solid #333;
+            overflow: hidden;
+            background-color: #fff;
+        }
+
+        .stage {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: none;
+        }
+
+        .stage.active {
+            display: block;
+        }
+
+        .stage img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* 클릭 가능한 오브젝트 스타일 */
+        .interactive-object {
+            position: absolute;
+            cursor: pointer;
+            border: 3px solid #FFD700;
+            border-radius: 10px;
+            box-shadow: 0 0 15px #FFD700, 0 0 10px #FFD700 inset;
+            animation: pulsate 2.5s infinite;
+            z-index: 10;
+        }
+
+        .interactive-object.found {
+            animation: none;
+            opacity: 0.4;
+            cursor: default;
+        }
+
+        .interactive-object:hover:not(.found) {
+            background-color: rgba(255, 215, 0, 0.25);
+        }
+        
+        @keyframes pulsate {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .password-input {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 10px;
+            background-color: rgba(255, 255, 255, 0.8);
+            border-radius: 5px;
+            display: flex;
+            gap: 5px;
+            z-index: 20;
+        }
+
+        input[type="text"] {
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+        }
+
+        button {
+            padding: 8px 15px;
+            border: none;
+            background-color: #007bff;
+            color: white;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        #final-surprise {
+            padding: 40px;
+            text-align: center;
+            background-color: #fff;
+            height: 100%;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #final-surprise h1 {
+            color: #ff4081;
+        }
+
+        /* Modal Styles */
+        #modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.6);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        #modal.show {
+            display: flex;
+        }
+
+        #modal-content {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 500px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+        #modal-body p {
+            font-size: 1.2em;
+            margin: 15px 0;
+        }
+        #modal-body input {
+            width: 80%;
+            padding: 8px;
+            margin: 10px 0;
+        }
+
+        #modal-close {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <!-- Stage 1: 추억의 거실 -->
+        <div id="stage-1" class="stage active">
+            <div class="interactive-object" style="top: 260px; left: 245px; width: 120px; height: 80px;" onclick="showQuiz('quiz1_1', this)"></div>
+            <div class="interactive-object" style="top: 165px; left: 565px; width: 100px; height: 100px;" onclick="showQuiz('quiz1_2', this)"></div>
+            <div class="interactive-object" style="top: 310px; left: 795px; width: 90px; height: 80px;" onclick="showQuiz('quiz1_3', this)"></div>
+
+            <img src="https://i.ibb.co/HTXkywvY/Whisk-df5f2cb805.jpg" alt="추억의 거실">
+            <div class="password-input">
+                <input type="text" id="stage1-password" placeholder="비밀번호 3자리">
+                <button onclick="checkPassword(1)">확인</button>
+            </div>
+        </div>
+
+        <!-- Stage 2: 사랑이 담긴 주방 -->
+        <div id="stage-2" class="stage">
+            <div class="interactive-object" style="top: 310px; left: 165px; width: 120px; height: 80px;" onclick="showQuiz('quiz2_1', this)"></div>
+            <div class="interactive-object" style="top: 195px; left: 470px; width: 110px; height: 70px;" onclick="showQuiz('quiz2_2', this)"></div>
+            <div class="interactive-object" style="top: 220px; left: 780px; width: 100px; height: 210px;" onclick="showQuiz('quiz2_3', this)"></div>
+
+            <img src="https://i.ibb.co/ch682n7v/Whisk-91508c7369.jpg" alt="사랑이 담긴 주방">
+            <div class="password-input">
+                <input type="text" id="stage2-password" placeholder="비밀번호 4자리 알파벳">
+                <button onclick="checkPassword(2)">확인</button>
+            </div>
+        </div>
+
+        <!-- Stage 3: 앞으로의 날들을 위한 침실 -->
+        <div id="stage-3" class="stage">
+             <div class="interactive-object" style="top: 160px; left: 420px; width: 110px; height: 110px;" onclick="showQuiz('quiz3_1', this)"></div>
+
+            <img src="https://i.ibb.co/DD9cmKwQ/Whisk-6ebfa1a4ed.jpg" alt="앞으로의 날들을 위한 침실">
+            <div class="password-input">
+                <input type="text" id="stage3-password" placeholder="최종 비밀번호를 입력하세요">
+                <button onclick="checkPassword(3)">탈출</button>
+            </div>
+        </div>
+
+        <!-- Final Surprise -->
+        <div id="final-surprise" class="stage">
+            <h1>사랑하는 엄마, 아빠!</h1>
+            <p>
+                언제나 저의 가장 든든한 버팀목이 되어주셔서 감사해요.<br>
+                두 분의 사랑과 헌신이 있었기에 지금의 제가 있을 수 있었습니다.<br>
+                오늘 하루, 세상에서 가장 행복한 날이 되기를 바라며,<br>
+                앞으로는 저희가 두 분의 행복을 책임질게요.<br><br>
+                진심으로 생신 축하드리고, 많이 사랑합니다.<br><br>
+                - 사랑하는 아들/딸 드림
+            </p>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div id="modal">
+        <div id="modal-content">
+            <h2 id="modal-title"></h2>
+            <div id="modal-body"></div>
+            <button id="modal-close">닫기</button>
+        </div>
+    </div>
+
+    <script>
+        // JavaScript 코드
+        let currentObject = null; // 현재 클릭된 오브젝트를 저장하는 변수
+
+        function showQuiz(quizId, element) {
+            if (element.classList.contains('found')) return;
+            currentObject = element;
+
+            const modal = document.getElementById('modal');
+            const modalTitle = document.getElementById('modal-title');
+            const modalBody = document.getElementById('modal-body');
+            let question = '';
+
+            // 각 퀴즈에 대한 질문 설정
+            switch (quizId) {
+                case 'quiz1_1':
+                    modalTitle.innerText = '첫 번째 문제';
+                    question = '무지개의 색깔은 총 몇 가지일까요?';
+                    break;
+                case 'quiz1_2':
+                    modalTitle.innerText = '두 번째 문제';
+                    question = "가위바위보에서 '가위'는 손가락 몇 개를 펴나요?";
+                    break;
+                case 'quiz1_3':
+                    modalTitle.innerText = '세 번째 문제';
+                    question = '한 손의 손가락은 몇 개일까요?';
+                    break;
+                case 'quiz2_1':
+                    modalTitle.innerText = '첫 번째 문제';
+                    question = "사자(Lion)의 첫 글자는 무엇일까요?";
+                    break;
+                case 'quiz2_2':
+                    modalTitle.innerText = '두 번째 문제';
+                    question = '오렌지(Orange)의 첫 글자는 무엇일까요?';
+                    break;
+                case 'quiz2_3':
+                    modalTitle.innerText = '세 번째 문제';
+                    question = "사랑(LOVE)의 세 번째와 네 번째 글자는 무엇일까요? (두 글자 연속으로 입력)";
+                    break;
+                case 'quiz3_1':
+                    modalTitle.innerText = '마지막 문제';
+                    question = "세상에서 가장 따뜻하고 힘이 되는 말은 무엇일까요?";
+                    break;
+            }
+
+            // 모달 창 내용 구성
+            modalBody.innerHTML = `
+                <p>${question}</p>
+                <input type="text" id="quiz-input" placeholder="정답을 입력하세요">
+                <button onclick="checkQuizAnswer('${quizId}')">정답 확인</button>
+            `;
+            modal.classList.add('show');
+            document.getElementById('quiz-input').focus(); // 입력창에 자동 포커스
+        }
+
+        function checkQuizAnswer(quizId) {
+            const userInput = document.getElementById('quiz-input').value.trim();
+            if (userInput === '') {
+                alert('정답을 입력해주세요!');
+                return;
+            }
+            
+            let isCorrect = false;
+            let hintMessage = '';
+
+            // 각 퀴즈의 정답과 힌트 메시지
+            switch (quizId) {
+                case 'quiz1_1':
+                    if (userInput === '7') {
+                        isCorrect = true;
+                        hintMessage = '정답! 첫 번째 숫자 힌트는 [ 7 ] 입니다.';
+                    }
+                    break;
+                case 'quiz1_2':
+                    if (userInput === '2') {
+                        isCorrect = true;
+                        hintMessage = '정답! 두 번째 숫자 힌트는 [ 2 ] 입니다.';
+                    }
+                    break;
+                case 'quiz1_3':
+                    if (userInput === '5') {
+                        isCorrect = true;
+                        hintMessage = '정답! 세 번째 숫자 힌트는 [ 5 ] 입니다.';
+                    }
+                    break;
+                case 'quiz2_1':
+                    if (userInput.toUpperCase() === 'L') {
+                        isCorrect = true;
+                        hintMessage = '정답! 첫 번째 알파벳 힌트는 [ L ] 입니다.';
+                    }
+                    break;
+                case 'quiz2_2':
+                    if (userInput.toUpperCase() === 'O') {
+                        isCorrect = true;
+                        hintMessage = '정답! 두 번째 알파벳 힌트는 [ O ] 입니다.';
+                    }
+                    break;
+                case 'quiz2_3':
+                    if (userInput.toUpperCase() === 'VE') {
+                        isCorrect = true;
+                        hintMessage = '정답! 세 번째/네 번째 알파벳 힌트는 [ V ] 와 [ E ] 입니다.';
+                    }
+                    break;
+                case 'quiz3_1':
+                     // 최종 비밀번호는 직접적인 힌트 대신 안내 문구를 보여줌
+                     isCorrect = true;
+                     hintMessage = '네, 맞아요. 마음속에 담아두었던 그 말을 최종 비밀번호로 입력해보세요!';
+                    break;
+            }
+
+            if (isCorrect) {
+                alert(hintMessage); // 힌트 또는 안내 메시지 표시
+                if (currentObject) {
+                    currentObject.classList.add('found'); // 오브젝트를 '찾음' 상태로 변경
+                }
+                closeModal(); // 모달 창 닫기
+            } else {
+                alert('틀렸습니다. 다시 생각해보세요!');
+            }
+        }
+
+        function checkPassword(stageNum) {
+            if (stageNum === 1) {
+                const password = document.getElementById('stage1-password').value;
+                if (password === '725') {
+                    alert("정답입니다! 다음 방으로 이동합니다.");
+                    document.getElementById('stage-1').classList.remove('active');
+                    document.getElementById('stage-2').classList.add('active');
+                } else {
+                    alert('비밀번호가 틀렸습니다.');
+                }
+            } else if (stageNum === 2) {
+                const password = document.getElementById('stage2-password').value.toUpperCase();
+                if (password === 'LOVE') {
+                    alert("정답입니다! 마지막 방으로 이동합니다.");
+                    document.getElementById('stage-2').classList.remove('active');
+                    document.getElementById('stage-3').classList.add('active');
+                } else {
+                    alert('비밀번호가 틀렸습니다.');
+                }
+            } else if (stageNum === 3) {
+                const password = document.getElementById('stage3-password').value.replace(/\s/g, ''); // 띄어쓰기 제거
+                if (password === '부모님사랑해요') {
+                    document.getElementById('stage-3').classList.remove('active');
+                    document.getElementById('final-surprise').classList.add('active');
+                } else {
+                    alert('비밀번호가 틀렸습니다.');
+                }
+            }
+        }
+
+        function closeModal() {
+            document.getElementById('modal').classList.remove('show');
+            currentObject = null;
+        }
+
+        document.getElementById('modal-close').addEventListener('click', closeModal);
+    </script>
+</body>
 </html>
